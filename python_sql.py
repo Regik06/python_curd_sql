@@ -45,6 +45,7 @@ def exist_clients(conn, client_id):
         ''',(client_id,))
         return cur.fetchone()
 
+
 def add_phone(conn, client_id, number):
     if True in exist_clients(conn, client_id):
         with conn.cursor() as cur:
@@ -57,29 +58,31 @@ def add_phone(conn, client_id, number):
             """)
             print(f' INSERT PHONE {cur.fetchall()}')
     else:
-        print('INSERT PHONE: !!Такого клиента нет в базе!!')
-
+        print(f'INSERT PHONE: Клиента с идентификатором {client_id} нет в базе!')
 
 
 def change_client(conn, client_id, name=None, last_name=None, email=None, phones=None):
-    with conn.cursor() as cur:
-        cur.execute('''
-        UPDATE clients SET name = %s WHERE id = %s;
-        ''', (name, client_id, ))
-        cur.execute('''
-        UPDATE clients SET last_name = %s WHERE id = %s;
-        ''', (last_name, client_id))
-        cur.execute('''
-                UPDATE clients SET email = %s WHERE id = %s;
-                ''', (email, client_id))
-        cur.execute('''
-                        UPDATE clients SET phones = %s WHERE id = %s;
-                        ''', (phones, client_id))
-        cur.execute("""
-                SELECT * FROM clients;
-                """)
+    if True in exist_clients(conn, client_id):
+        with conn.cursor() as cur:
+            cur.execute('''
+            UPDATE clients SET name = %s WHERE id = %s;
+            ''', (name, client_id, ))
+            cur.execute('''
+            UPDATE clients SET last_name = %s WHERE id = %s;
+            ''', (last_name, client_id))
+            cur.execute('''
+            UPDATE clients SET email = %s WHERE id = %s;
+            ''', (email, client_id))
+            cur.execute('''
+                            UPDATE clients SET phones = %s WHERE id = %s;
+                            ''', (phones, client_id))
+            cur.execute("""
+                    SELECT * FROM clients;
+                    """)
 
-        print(f' UPDATE DATA {cur.fetchall()}')
+            print(f' UPDATE DATA {cur.fetchall()}')
+    else:
+        print(f'UPDATE DATA: Клиента с идентификатором {client_id} нет в базе!')
 
 
 def delete_phone(conn, client_id):
@@ -93,7 +96,7 @@ def delete_phone(conn, client_id):
             """)
             print(f'DELETE PHONE {cur.fetchall()}')
     else:
-        print('DELETE PHONE: !!Такого клиента нет в базе!!')
+        print(f'DELETE PHONE: Клиента с идентификатором {client_id} нет в базе!')
 
 def delete_client(conn, client_id):
     if True in exist_clients(conn, client_id):
@@ -106,7 +109,7 @@ def delete_client(conn, client_id):
                     """)
             print(f'DELETE CLIENTS {cur.fetchall()}')
     else:
-        print('DELETE CLIENTS: !!Такого клиента нет в базе!!')
+        print(f'DELETE CLIENTS: Клиента с идентификатором {client_id} нет в базе!')
 
 def find_client(conn, name=None, last_name=None, email=None, phone=None):
     with conn.cursor() as cur:
@@ -114,7 +117,7 @@ def find_client(conn, name=None, last_name=None, email=None, phone=None):
                 SELECT name, last_name, p.number FROM clients as c 
                 LEFT JOIN phone as p on p.client_id=c.id
                 WHERE c.name=%s;
-                """, (name,))
+                   """, (name,))
         print(f'SELECT NAME {cur.fetchall()}')
         cur.execute("""
         SELECT name, last_name, p.number FROM clients as c 
