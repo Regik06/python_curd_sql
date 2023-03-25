@@ -38,16 +38,26 @@ def add_client(conn, name, last_name, email, phones=None):
         print(f'INSERT CLIENT INFO {cur.fetchall()}')
 
 
-def add_phone(conn, client_id, number):
+def exist_clients(conn, client_id):
     with conn.cursor() as cur:
         cur.execute('''
-        INSERT INTO phone(client_id, number) VALUES(%s, %s)
-        RETURNING id, number;
-        ''', (client_id, number))
-        cur.execute("""
-        SELECT * FROM phone;
-        """)
-        print(f' INSERT PHONE {cur.fetchall()}')
+        SELECT EXISTS(SELECT id FROM clients WHERE id = %s)
+        ''',(client_id,))
+        return cur.fetchone()
+
+def add_phone(conn, client_id, number):
+    if True in exist_clients(conn, client_id):
+        with conn.cursor() as cur:
+            cur.execute('''
+            INSERT INTO phone(client_id, number) VALUES(%s, %s)
+            RETURNING id, number;
+            ''', (client_id, number))
+            cur.execute("""
+            SELECT * FROM phone;
+            """)
+            print(f' INSERT PHONE {cur.fetchall()}')
+    else:
+        print('INSERT PHONE: !!Такого клиента нет в базе!!')
 
 
 
@@ -70,14 +80,6 @@ def change_client(conn, client_id, name=None, last_name=None, email=None, phones
                 """)
 
         print(f' UPDATE DATA {cur.fetchall()}')
-
-
-def exist_clients(conn, client_id):
-    with conn.cursor() as cur:
-        cur.execute('''
-        SELECT EXISTS(SELECT id FROM clients WHERE id = %s)
-        ''',(client_id,))
-        return cur.fetchone()
 
 
 def delete_phone(conn, client_id):
